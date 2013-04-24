@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -36,6 +37,8 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
+		
+		//final Communicator comm = new Communicator("192.168.1.2");
 
 		// inisialisasi instansi
 		instance = this;
@@ -93,6 +96,8 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
+				
+				//comm.sendString(Message.ND);
 
 				if (clicked)
 					switches.clear();
@@ -113,8 +118,7 @@ public class MainActivity extends Activity {
 					
 					text.setLayoutParams(rowParams);
 					
-					
-
+				
 					final SpecialToggle toggle = new SpecialToggle(instance);
 					toggle.setLayoutParams(rowParams);
 
@@ -157,6 +161,15 @@ public class MainActivity extends Activity {
 
 		});
 		instance.setContentView(rl);
+	}
+	
+	public boolean onKeyDown(int keyCode, KeyEvent event){
+		if(keyCode == KeyEvent.KEYCODE_BACK){
+			instance.finish();
+			oldNumber = 0;
+			return true;
+		}
+		return false;
 	}
 
 }
