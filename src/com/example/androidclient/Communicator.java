@@ -30,6 +30,7 @@ public class Communicator {
 	public void connect() {
 		try {
 			socket = new Socket(address, PORT);
+			//socket.connect(new InetSocketAddress(address, PORT), 2000);
 			out = new PrintWriter(socket.getOutputStream());
 			in = new BufferedReader(new InputStreamReader(
 					socket.getInputStream()));
@@ -46,15 +47,16 @@ public class Communicator {
 		try {
 			object = new ObjectInputStream(socket.getInputStream());
 		} catch (StreamCorruptedException e) {
-			Log.v("error", "Stream corrupted");
+			Log.v("exception", "Stream corrupted");
 		} catch (IOException e) {
-			Log.v("error", "Object input Stream error");
+			Log.v("exception", "Object input Stream error");
 		}
 		return object;
 	}
 
 	public void sendString(String message) {
 		out.write(message);
+		out.flush();
 	}
 
 	public String getAddress() {
@@ -69,6 +71,8 @@ public class Communicator {
 		if (this.socket != null) {
 			try {
 				socket.close();
+			
+				
 				out.close();
 				in.close();
 			} catch (IOException e) {
@@ -76,6 +80,13 @@ public class Communicator {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public boolean isConnected(){
+		if(this.socket != null){
+			return true;
+		}
+		else return false;
 	}
 
 }

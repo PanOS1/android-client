@@ -32,13 +32,12 @@ public class MainActivity extends Activity {
 	private TableRow row;
 	private static TableLayout.LayoutParams tableParams;
 	private static TableRow.LayoutParams rowParams;
+	private Communicator comm;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
-		
-		//final Communicator comm = new Communicator("192.168.1.2");
 
 		// inisialisasi instansi
 		instance = this;
@@ -60,7 +59,7 @@ public class MainActivity extends Activity {
 
 		// inisialisasi relative layout
 		rl = new RelativeLayout(instance);
-		//rl.setBackgroundColor(Color.BLUE);
+		// rl.setBackgroundColor(Color.BLUE);
 
 		// switches merupakan kumpulan ToggleButton
 		switches = new ArrayList<SpecialToggle>();
@@ -68,7 +67,7 @@ public class MainActivity extends Activity {
 		// menambahkan scroll view ke dalam relative layout
 		rl.addView(sv);
 
-		// set orientasi dari list layout ke dalam vertical layout
+		// set orientasi dari list layout ke dalam vertical layout sehingga akan tampil ke bawah tidak ke samping
 		ll.setOrientation(LinearLayout.VERTICAL);
 
 		// menambahkan linear layout ke dalam scroll view
@@ -77,94 +76,114 @@ public class MainActivity extends Activity {
 		// text untuk judul
 		TextView tv = new TextView(instance);
 		tv.setGravity(Gravity.CENTER | Gravity.TOP);
-	
-		tv.setText("Halo Dunia");
-		tv.setTextSize(20);
 
-		// tambahkan text ke dalam list view
-		ll.addView(tv);
+		//terima address dari parameter
+		String address = this.getIntent().getStringExtra("IP_ADDR");
+		comm = new Communicator(address);
+		
+		//koneksikan
+		comm.connect();
 
-		// membuat tombol untuk menggernasikan switchh
-		Button b = new Button(instance);
-		b.setText("I do dynamically add toggle on your listview");
+		if (comm.isConnected()) {
+			tv.setText("Connected to: " + address);
+			tv.setTextSize(20);
 
-		// menambahkan tombol ke dalam list view
-		ll.addView(b);
+			// tambahkan text ke dalam list view
+			ll.addView(tv);
 
-		// jika tombol di klik
-		b.setOnClickListener(new OnClickListener() {
+			// membuat tombol untuk menggernasikan switchh
+			Button b = new Button(instance);
+			b.setGravity(Gravity.CENTER);
+			b.setText("Node Discovery");
 
-			@Override
-			public void onClick(View v) {
-				
-				//comm.sendString(Message.ND);
+			// menambahkan tombol ke dalam list view
+			ll.addView(b);
 
-				if (clicked)
-					switches.clear();
-				for (int i = 0; i < oldNumber; i++) {
-					ll.removeViewAt((oldNumber + 1) - i);
-				}
+			// jika tombol di klik
+			b.setOnClickListener(new OnClickListener() {
 
-				Random random = new Random();
-				int count = random.nextInt(5) + 1;
-				for (int i = 0; i < count; i++) {
-					table = new TableLayout(instance);
-					table.setLayoutParams(tableParams);
+				@Override
+				public void onClick(View v) {
 
-					row = new TableRow(instance);
-					row.setLayoutParams(rowParams);
+					comm.sendString(Message.ND);
 
-					TextView text = new TextView(instance);
-					
-					text.setLayoutParams(rowParams);
-					
-				
-					final SpecialToggle toggle = new SpecialToggle(instance);
-					toggle.setLayoutParams(rowParams);
+					if (clicked)
+						switches.clear();
+					for (int i = 0; i < oldNumber; i++) {
+						ll.removeViewAt((oldNumber + 1) - i);
 
-					toggle.setId(i + 1);
-					text.setText("Node "+toggle.getId()+",dengan alamat Node:"+toggle.getAddress());
-					toggle.setChecked(random.nextBoolean());
-					toggle.setOnClickListener(new OnClickListener() {
+					}
 
-						@Override
-						public void onClick(View v) {
-							if (toggle.isChecked()) {
-								Log.v("Coba: ", toggle.getId() + " Checked");
-								Toast toast = Toast.makeText(instance, "Lamp "
-										+ toggle.getId() + " is ON",
-										Toast.LENGTH_SHORT);
-								toast.show();
-							} else {
-								Log.v("Coba: ", toggle.getId() + " Unchecked");
-								Toast toast = Toast.makeText(instance, "Lamp "
-										+ toggle.getId() + " is OFF",
-										Toast.LENGTH_SHORT);
-								toast.show();
+					Random random = new Random();
+					int count = random.nextInt(5) + 1;
+					for (int i = 0; i < count; i++) {
+						table = new TableLayout(instance);
+						table.setLayoutParams(tableParams);
+
+						row = new TableRow(instance);
+						row.setLayoutParams(rowParams);
+
+						TextView text = new TextView(instance);
+
+						text.setLayoutParams(rowParams);
+
+						final SpecialToggle toggle = new SpecialToggle(instance);
+						toggle.setLayoutParams(rowParams);
+
+						toggle.setId(i + 1);
+						text.setText("Node " + toggle.getId()
+								+ ",dengan alamat Node:" + toggle.getAddress());
+						toggle.setChecked(random.nextBoolean());
+						toggle.setOnClickListener(new OnClickListener() {
+
+							@Override
+							public void onClick(View v) {
+								if (toggle.isChecked()) {
+									Log.v("Coba: ", toggle.getId() + " Checked");
+									Toast toast = Toast.makeText(instance, "Lamp "
+											+ toggle.getId() + " is ON",
+											Toast.LENGTH_SHORT);
+									toast.show();
+								} else {
+									Log.v("Coba: ", toggle.getId() + " Unchecked");
+									Toast toast = Toast.makeText(instance, "Lamp "
+											+ toggle.getId() + " is OFF",
+											Toast.LENGTH_SHORT);
+									toast.show();
+								}
 							}
-						}
-					});
-					switches.add(toggle);
-					
-					//menambahkan tombol dan text ke dalam tabel view
-					row.addView(switches.get(i));
-					row.addView(text);
-					table.addView(row);
-					table.setGravity(Gravity.CENTER);
-					ll.addView(table);
+						});
+						switches.add(toggle);
+
+						// menambahkan tombol dan text ke dalam tabel view
+						row.addView(switches.get(i));
+						row.addView(text);
+						table.addView(row);
+						table.setGravity(Gravity.CENTER);
+						ll.addView(table);
+					}
+
+					clicked = true;
+
+					oldNumber = count;
 				}
 
-				clicked = true;
+			});
+		}
+		
+		else
+		{
+			tv.setText("Koneksi gagal");
+			ll.addView(tv);
+		}
 
-				oldNumber = count;
-			}
-
-		});
+		
 		instance.setContentView(rl);
 	}
-	
-	public boolean onKeyDown(int keyCode, KeyEvent event){
-		if(keyCode == KeyEvent.KEYCODE_BACK){
+
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			comm.close();
 			instance.finish();
 			oldNumber = 0;
 			return true;
