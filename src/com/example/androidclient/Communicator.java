@@ -30,7 +30,7 @@ public class Communicator {
 	public void connect() {
 		try {
 			socket = new Socket(address, PORT);
-			//socket.connect(new InetSocketAddress(address, PORT), 2000);
+			// socket.connect(new InetSocketAddress(address, PORT), 2000);
 			out = new PrintWriter(socket.getOutputStream());
 			in = new BufferedReader(new InputStreamReader(
 					socket.getInputStream()));
@@ -71,8 +71,6 @@ public class Communicator {
 		if (this.socket != null) {
 			try {
 				socket.close();
-			
-				
 				out.close();
 				in.close();
 			} catch (IOException e) {
@@ -81,12 +79,12 @@ public class Communicator {
 			}
 		}
 	}
-	
-	public boolean isConnected(){
-		if(this.socket != null){
+
+	public boolean isConnected() {
+		if (this.socket != null) {
 			return true;
-		}
-		else return false;
+		} else
+			return false;
 	}
 
 }

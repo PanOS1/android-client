@@ -4,6 +4,7 @@ public class Message {
 	
 	public static final String ON = "ON";
 	public static final String OFF = "OFF";
-	public static final String ND = "ND\n";
+	public static final String ND = "ND";
+	public static final String QUIT = "QUIT";
 
 }

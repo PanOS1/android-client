@@ -1,7 +1,9 @@
 package com.example.androidclient;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.OptionalDataException;
 import java.util.ArrayList;
-import java.util.Random;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -102,20 +104,35 @@ public class MainActivity extends Activity {
 			// jika tombol di klik
 			b.setOnClickListener(new OnClickListener() {
 
+				@SuppressWarnings("unchecked")
 				@Override
 				public void onClick(View v) {
 
-					comm.sendString(Message.ND);
+					comm.sendString(Message.ND+"\n");
+					ArrayList<String> nodes = new ArrayList<String>();
+					ObjectInputStream input = comm.getStreamObject();
+					try {
+						nodes = (ArrayList<String>)input.readObject();
+					} catch (OptionalDataException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 
 					if (clicked)
 						switches.clear();
+					
 					for (int i = 0; i < oldNumber; i++) {
 						ll.removeViewAt((oldNumber + 1) - i);
 
 					}
 
-					Random random = new Random();
-					int count = random.nextInt(5) + 1;
+					int count = nodes.size();
 					for (int i = 0; i < count; i++) {
 						table = new TableLayout(instance);
 						table.setLayoutParams(tableParams);
@@ -131,20 +148,29 @@ public class MainActivity extends Activity {
 						toggle.setLayoutParams(rowParams);
 
 						toggle.setId(i + 1);
+						final String address = nodes.get(i).split(":")[0]+":"+nodes.get(i).split(":")[1];
+						toggle.setAddress(address);
 						text.setText("Node " + toggle.getId()
 								+ ",dengan alamat Node:" + toggle.getAddress());
-						toggle.setChecked(random.nextBoolean());
+						boolean lampState = false;
+						
+						if(nodes.get(i).split(":")[2].equals("1"))
+							lampState = true;
+						
+						toggle.setChecked(lampState);
 						toggle.setOnClickListener(new OnClickListener() {
 
 							@Override
 							public void onClick(View v) {
 								if (toggle.isChecked()) {
+									comm.sendString(Message.OFF+","+address+"\n");
 									Log.v("Coba: ", toggle.getId() + " Checked");
 									Toast toast = Toast.makeText(instance, "Lamp "
 											+ toggle.getId() + " is ON",
 											Toast.LENGTH_SHORT);
 									toast.show();
 								} else {
+									comm.sendString(Message.ON+","+address+"\n");
 									Log.v("Coba: ", toggle.getId() + " Unchecked");
 									Toast toast = Toast.makeText(instance, "Lamp "
 											+ toggle.getId() + " is OFF",
@@ -183,6 +209,7 @@ public class MainActivity extends Activity {
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			comm.sendString(Message.QUIT);
 			comm.close();
 			instance.finish();
 			oldNumber = 0;
